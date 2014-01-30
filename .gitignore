@@ -1,6 +1,9 @@
 *.class
 
 # Package Files #
+build/**
+dist/**
+nbproject/**
 *.jar
 *.war
 *.ear
