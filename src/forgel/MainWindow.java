@@ -13,8 +13,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -151,6 +153,17 @@ public class MainWindow extends JFrame {
 		disconnect.addActionListener(new ComDisconnectListener());
 		buttons.add(disconnect);
 
+		JButton hw_options = new JButton("HW Optionen");
+		hw_options.addActionListener(new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JDialog hw_opt = new forgel.gui.HardwareModalDialog();
+				hw_opt.setVisible(true);
+			}
+
+		});
+		buttons.add(hw_options);
+
 		GridBagConstraints c2 = new GridBagConstraints();
 		c2.fill = GridBagConstraints.NORTHEAST;
 		c2.gridwidth = GridBagConstraints.REMAINDER;
@@ -163,6 +176,7 @@ public class MainWindow extends JFrame {
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
 			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				Hearth.getInstance().stopAllImediantly();
 				System.exit(0);
 			}
 		});
@@ -188,6 +202,14 @@ public class MainWindow extends JFrame {
 		});
 		buttons.add(clean);
 
+		JButton panic = new JButton("PANIK!");
+		panic.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Hearth.getInstance().stopAllImediantly();
+			}
+		});
+		buttons.add(panic);
 
 		GridBagConstraints c1 = new GridBagConstraints();
 		c1.fill = GridBagConstraints.CENTER;
