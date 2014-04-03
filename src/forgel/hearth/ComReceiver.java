@@ -4,6 +4,7 @@
  */
 package forgel.hearth;
 
+import forgel.gui.MainWindow;
 import forgel.*;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;

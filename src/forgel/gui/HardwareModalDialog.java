@@ -5,7 +5,6 @@
  */
 package forgel.gui;
 
-import forgel.MainWindow;
 import javax.swing.JDialog;
 
 /**
@@ -16,8 +15,9 @@ public class HardwareModalDialog extends JDialog {
 
 	public HardwareModalDialog() {
 		this.setModal(true);
+		this.setLocationRelativeTo(MainWindow.getInstance());
 		this.add(new HardwareOptions());
-		this.setSize(800, 600);
+		this.setSize(300, 200);
 	}
 
 }

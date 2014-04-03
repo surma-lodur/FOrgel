@@ -4,6 +4,7 @@
  */
 package forgel;
 
+import forgel.gui.MainWindow;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -38,11 +39,7 @@ public class MidiListener implements Receiver {
 			printMessage(b, timeStamp);
 			if (commandMap.containsKey(b[0])) {
 				if (Hearth.getInstance() != null) {
-					if (b[0] == (byte) 0x90) {
-						Hearth.getInstance().callNote(b[1], timeStamp);
-					} else if (b[0] == (byte) 0x80) {
-						Hearth.getInstance().stopNote(b[1], timeStamp);
-					}
+					new MidiCommandThread(b, timeStamp);
 				}
 
 			}

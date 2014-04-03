@@ -2,9 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package forgel;
+package forgel.gui;
 
-import forgel.hearth.HearthComListener;
+import forgel.Hearth;
+import forgel.MidiListener;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -176,7 +177,14 @@ public class MainWindow extends JFrame {
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
 			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-				Hearth.getInstance().stopAllImediantly();
+				if (Hearth.getInstance() != null) {
+					Hearth.getInstance().stopAllImediantly();
+				}
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException ex) {
+					Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+				}
 				System.exit(0);
 			}
 		});

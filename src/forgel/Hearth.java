@@ -4,11 +4,15 @@
  */
 package forgel;
 
+import forgel.gui.MainWindow;
 import forgel.hearth.ComReceiver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jssc.SerialPort;
@@ -21,7 +25,7 @@ import jssc.SerialPortException;
 public class Hearth {
 
 	private volatile static Hearth instance;
-	private static int drive_count = 2;
+	private static int drive_count = 6;
 
 	public static Hearth getInstance(String port, int floppy_count) {
 		drive_count = floppy_count;
@@ -57,7 +61,8 @@ public class Hearth {
 	 */
 	private String portName;
 	private List<Floppy> drives;
-	private static volatile HashMap<Short, Floppy> notePlayingDrives;
+	private static Semaphore semaphore = new Semaphore(1);
+	private static volatile HashMap<Short, Stack<Floppy>> notePlayingDrives;
 	private SerialPort serialPort;
 
 	private Hearth(String port, int floppy_count) {
@@ -77,50 +82,78 @@ public class Hearth {
 	} // Constructor
 
 	public void callNote(short note, long timeStamp) {
-		attachFloppy(note);
-		if (!notePlayingDrives.containsKey(note)) {
-			MainWindow.printCom("No free Drive for " + note);
-			return;
-		}
+		callNote(note, timeStamp, 0.0);
+	}
 
-		Floppy drive = notePlayingDrives.get(note);
+	public void callNote(short note, long timeStamp, double spread) {
+		try {
+			semaphore.acquire();
+			attachFloppy(note);
+			Floppy drive = fetchFloppy(note);
+			if (drive == null) {
+				MainWindow.printCom("No free Drive for " + note);
+				return;
+			}
 
-		byte buffer[] = drive.play(note, timeStamp);
-		if (buffer.length == 0) {
-			MainWindow.printCom("No Freq for " + note);
-		} else {
-			MainWindow.printCom(
-							drive.getIndex() + "|"
-							+ String.format("%02X ", note)
-							+ "> "
-							+ new String(buffer));
-			sendSerial(buffer);
+			byte buffer[] = drive.play(note, timeStamp, spread);
+			if (buffer.length == 0) {
+				MainWindow.printCom("No Freq for " + note);
+			} else {
+				MainWindow.printCom(
+								drive.getIndex() + "|"
+								+ String.format("%02X ", note)
+								+ "> "
+								+ new String(buffer));
+				sendSerial(buffer);
+			}
+
+		} catch (InterruptedException e) {
+			MainWindow.printCom("Interruppted " + e);
+
+		} finally {
+			semaphore.release();
 		}
 	} // callNote
 
 	public void stopNote(short note, long timeStamp) {
-		if (!notePlayingDrives.containsKey(note)) {
-			MainWindow.printCom("! No Drive with " + String.format("%02X ", note) + "|" + notePlayingDrives.size());
+		try {
+			semaphore.acquire();
+			Floppy drive = fetchFloppy(note);
+			if (drive == null) {
+				MainWindow.printCom("! No Drive with " + String.format("%02X ", note) + "|" + notePlayingDrives.size());
 
-		} else {
-			Floppy drive = notePlayingDrives.get(note);
-			byte buffer[] = drive.stop(timeStamp);
-			MainWindow.printCom(
-							drive.getIndex()
-							+ "|"
-							+ String.format("%02X ", note)
-							+ "< "
-							+ new String(buffer));
-			sendSerial(buffer);
-			notePlayingDrives.remove(note);
+			} else {
+				byte buffer[] = drive.stop(timeStamp);
+				MainWindow.printCom(
+								drive.getIndex()
+								+ "|"
+								+ String.format("%02X ", note)
+								+ "< "
+								+ new String(buffer)
+				);
+				sendSerial(buffer);
+				releaseFloppy(note);
+			}
+		} catch (InterruptedException e) {
+			MainWindow.printCom("Interruppted " + e);
+
+		} finally {
+			semaphore.release();
 		}
 	} // stopNote
 
 	public void stopAllImediantly() {
-		for (Floppy drive : drives) {
-			sendSerial(drive.stopDirect());
-		}
+		try {
+			semaphore.acquire();
+			for (Floppy drive : drives) {
+				sendSerial(drive.stopDirect());
+			}
+		} catch (InterruptedException e) {
+			MainWindow.printCom("Interruppted " + e);
 
+		} finally {
+			semaphore.release();
+		}
 		notePlayingDrives = new HashMap<>();
 		MainWindow.printCom("PANIK");
 	}
@@ -187,9 +220,35 @@ public class Hearth {
 		Floppy drive = getFreeFloppy();
 		if (drive != null) {
 			if (!notePlayingDrives.containsKey(note)) {
-				notePlayingDrives.put(note, drive);
+				Stack<Floppy> drive_list = new Stack();
+				drive_list.push(drive);
+				notePlayingDrives.put(note, drive_list);
+			} else {
+				notePlayingDrives.get(note).push(drive);
 			}
 		}
+	}
+
+	private void releaseFloppy(short note) {
+		notePlayingDrives.get(note).pop();
+
+		if (notePlayingDrives.get(note).isEmpty()) {
+			notePlayingDrives.remove(note);
+		}
+	}
+
+	/**
+	 * Returns null if no floppy exists
+	 *
+	 * @param note
+	 * @return
+	 */
+	private Floppy fetchFloppy(short note) {
+		if (!notePlayingDrives.containsKey(note)) {
+			return null;
+		}
+		return notePlayingDrives.get(note).peek();
+
 	}
 
 	private Floppy getFreeFloppy() {
@@ -211,8 +270,7 @@ public class Hearth {
 			serialPort.writeBytes(data);
 		} catch (Exception ex) {
 			MainWindow.printCom(ex);
-			Logger.getLogger(Hearth.class
-							.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(Hearth.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	} // sendSerial
 
