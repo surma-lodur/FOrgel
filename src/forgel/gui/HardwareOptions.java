@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
 
 /**
  *
@@ -43,6 +44,8 @@ public class HardwareOptions extends javax.swing.JPanel {
     jLabel3 = new javax.swing.JLabel();
     jCheckBox1 = new javax.swing.JCheckBox();
     spreadSpinner = new javax.swing.JSpinner();
+    testFloppy = new javax.swing.JSpinner();
+    jToggleButton1 = new javax.swing.JToggleButton();
 
     floppyCount.setInheritsPopupMenu(true);
     floppyCount.setValue(Hearth.getDriveCount());
@@ -75,6 +78,13 @@ public class HardwareOptions extends javax.swing.JPanel {
       }
     });
 
+    jToggleButton1.setText("jToggleButton1");
+    jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jToggleButton1ActionPerformed(evt);
+      }
+    });
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -94,10 +104,13 @@ public class HardwareOptions extends javax.swing.JPanel {
               .addComponent(jLabel3)
               .addComponent(jLabel2))
             .addGap(40, 40, 40)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
               .addComponent(jCheckBox1)
-              .addComponent(spreadSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE))))
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+              .addComponent(spreadSpinner, javax.swing.GroupLayout.DEFAULT_SIZE, 53, Short.MAX_VALUE)
+              .addComponent(testFloppy))
+            .addGap(18, 18, 18)
+            .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        .addContainerGap(31, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -119,7 +132,11 @@ public class HardwareOptions extends javax.swing.JPanel {
             .addComponent(jCheckBox1)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
             .addComponent(spreadSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-        .addGap(0, 13, Short.MAX_VALUE))
+        .addGap(18, 18, 18)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(testFloppy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(jToggleButton1))
+        .addGap(0, 74, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -154,6 +171,19 @@ public class HardwareOptions extends javax.swing.JPanel {
 		}
   }//GEN-LAST:event_spreadSpinnerPropertyChange
 
+  private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
+		// TODO add your handling code here:
+		Object element = evt.getSource();
+		if (element instanceof JToggleButton) {
+			JToggleButton button = (JToggleButton) element;
+			if (button.isSelected()) {
+				Hearth.getInstance().callFloppy((int) testFloppy.getValue());
+			} else {
+				Hearth.getInstance().stopAllImediantly();
+			}
+		}
+  }//GEN-LAST:event_jToggleButton1ActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroup1;
   public static javax.swing.JSpinner floppyCount;
@@ -163,6 +193,8 @@ public class HardwareOptions extends javax.swing.JPanel {
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JSeparator jSeparator1;
+  private javax.swing.JToggleButton jToggleButton1;
   private javax.swing.JSpinner spreadSpinner;
+  private javax.swing.JSpinner testFloppy;
   // End of variables declaration//GEN-END:variables
 }

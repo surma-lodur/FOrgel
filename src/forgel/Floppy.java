@@ -24,7 +24,6 @@ public class Floppy {
 	// see http://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
 	// 49 A4 Kammerton entspricht midi 69
 	private short noteOffset; // 40 middle C
-	private short noteLimit;
 	private Map<Short, Double> noteMap;
 	private boolean noteOn;
 	private long timeStamp;
@@ -46,8 +45,6 @@ public class Floppy {
 			noteMap.put((short) (i + noteOffset), FrequencyCalculator.get(i - noteOffset));
 		}
 
-		System.out.println(noteMap.keySet());
-		System.out.println(noteMap.values());
 	} // mapFrequencies
 
 	public boolean isIdle() {
@@ -92,7 +89,8 @@ public class Floppy {
 		byte buffer[] = {};
 		try {
 			//sleepAtLeast((int) (timeDifference / 1000) - ((timeDifference / 100000)));
-			sleepAtLeast((int) ((timeDifference / 1000) * 0.202) / 1);
+			//sleepAtLeast((int) ((timeDifference / 1000) * 0.202) / 1);
+			sleepAtLeast((int) ((timeDifference / 1000) * 0.215) / 1);
 
 		} catch (InterruptedException ex) {
 			Logger.getLogger(Floppy.class.getName()).log(Level.SEVERE, null, ex);

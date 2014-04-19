@@ -80,7 +80,7 @@ void parseReceivedBuffer() {
 
   Serial.print(floppyIndex);
   Serial.print(" ms: ");
-  Serial.println(mSec[floppyIndex]);
+  Serial.println(mSec[floppyIndex-1]);
   buffer[0] = '\0';
 }
 /**

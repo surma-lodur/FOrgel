@@ -115,6 +115,31 @@ public class Hearth {
 		}
 	} // callNote
 
+	public void callFloppy(int floppy) {
+		try {
+			semaphore.acquire();
+			Floppy drive = drives.get(floppy);
+			if (drive == null) {
+				MainWindow.printCom("No Drive for " + floppy);
+				return;
+			}
+
+			byte buffer[] = drive.play((short) 65, (short) 0xa, 0);
+
+			MainWindow.printCom(
+							drive.getIndex() + "|"
+							+ "Test > "
+							+ new String(buffer));
+			sendSerial(buffer);
+
+		} catch (InterruptedException e) {
+			MainWindow.printCom("Interruppted " + e);
+
+		} finally {
+			semaphore.release();
+		}
+	}
+
 	public void stopNote(short note, long timeStamp) {
 		try {
 			semaphore.acquire();
@@ -166,6 +191,7 @@ public class Hearth {
 		try {
 			serialPort.closePort();
 			MainWindow.printCom("Disconnected");
+
 		} catch (SerialPortException ex) {
 			Logger.getLogger(Hearth.class
 							.getName()).log(Level.SEVERE, null, ex);
@@ -270,7 +296,9 @@ public class Hearth {
 			serialPort.writeBytes(data);
 		} catch (Exception ex) {
 			MainWindow.printCom(ex);
-			Logger.getLogger(Hearth.class.getName()).log(Level.SEVERE, null, ex);
+			Logger
+							.getLogger(Hearth.class
+											.getName()).log(Level.SEVERE, null, ex);
 		}
 	} // sendSerial
 
